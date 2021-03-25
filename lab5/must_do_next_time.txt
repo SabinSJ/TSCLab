@@ -1,0 +1,79 @@
+class transaction
+	op_A
+	op_B
+	op_code
+	write_pointer
+	
+	function void randomize_transaction
+	
+	end function;
+	
+	function void print_transaction
+	
+	end function;
+
+end class
+
+class driver
+	transaction tr;
+	virtual tb_ifc vio;
+	
+	new(tb_ifc new_io)
+	begin
+		vio <= new_io;
+	end function;
+	
+	function generate_transaction
+		repeat (3) begin
+		@(io.cb) tr.randomize_transaction
+		io.cb.op_A <= tr.op_A;
+		io.cb.op_B <= tr.op_B
+		io.ob.op_code <= tr.op_code;
+		io.cb.write_pointer <= tr.write_pointer;
+		@(io.cb) tr.print_transaction;
+	end function;
+	
+	function drive_transaction
+		reset_signals;
+	
+	end function;
+
+end class
+
+
+class monitor
+	
+
+
+end class
+
+
+
+class Test(Tb)
+
+	initial
+
+	driver drv;
+	drv = new(io);
+	drv.generate_transaction;
+
+	function read_result
+		for (int i=0; i<=2; i++) begin
+			// A later lab will replace this loop with iterating through a
+			// scoreboard to determine which address were written and the
+			// expected values to be read back
+			@(posedge io.cb) io.cb.read_pointer <= i;
+			@(posedge io.cb) print_results;
+		end
+
+	end function
+
+end class;
+
+
+
+
+
+
+
+
