@@ -18,7 +18,7 @@ class driver
 	transaction tr;
 	virtual tb_ifc vio;
 	
-	new(tb_ifc new_io)
+	function new(tb_ifc new_io)
 	begin
 		vio <= new_io;
 	end function;
