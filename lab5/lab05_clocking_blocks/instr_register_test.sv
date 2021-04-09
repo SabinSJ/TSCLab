@@ -25,9 +25,20 @@ module instr_register_test (tb_ifc io);  // interface port
 	rand operand_t operand_b;
 	address_t write_pointer;
 	
-	constraint op_a { operand_a > -16; operand_a < 16;}
-	constraint op_b { operand_b > -1; operand_b < 16;}
-	constraint op_code { opcode > -1; opcode < 7;}
+	constraint op_a{
+	operand_a >= -15 ;
+	operand_a <= 15;
+	}
+	
+	constraint op_b{
+	operand_b >= 0;
+	operand_b <=15;	
+	}
+	
+	constraint opc{
+	opcode >= 0;
+	opcode <= 7;
+	}
 	
 	// function void randomize_transaction();
 		// // A later lab will replace this function with SystemVerilog
@@ -246,9 +257,6 @@ initial begin
 	
 	driver = new(io);
 	monitor = new(io);
-	
-	driver.reset_signals;
-	driver.assign_signals;
 	
 	driver.generate_transaction();
 	monitor.transaction_monitor();
