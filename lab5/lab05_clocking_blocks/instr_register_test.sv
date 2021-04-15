@@ -26,7 +26,7 @@ module instr_register_test (tb_ifc io);  // interface port
 	address_t write_pointer;
 	
 	constraint op_a{
-	operand_a >= -15 ;
+	operand_a >= -15;
 	operand_a <= 15;
 	}
 	
@@ -77,11 +77,52 @@ module instr_register_test (tb_ifc io);  // interface port
 	virtual tb_ifc vifc;
 	transaction tr;
 	transaction_extends tr_ext;
+	
+	covergroup inputs_measure;
+	
+		cov_0: coverpoint vifc.cb.opcode{
+			bins val_zero 	= {ZERO};
+			bins val_passa 	= {PASSA};
+			bins val_passb 	= {PASSB};
+			bins val_add 	= {ADD};
+			bins val_sub 	= {SUB};
+			bins val_mult 	= {MULT};
+			bins val_div 	= {DIV};
+			bins val_mod 	= {MOD};
+		}
+		
+		cov_1: coverpoint vifc.cb.operand_a{
+			bins val_op_a[] = {[-15:15]};
+		}
+		
+		cov_2: coverpoint vifc.cb.operand_b{
+			bins val_op_b[] = {[0:15]};
+		}
+		
+		cov_3: coverpoint vifc.cb.operand_a{
+			bins val_op_a_neg = {[-15:-1]};
+			bins val_op_a_poz = {[0:15]};
+		}
+		
+		cov_4: cross cov_0,cov_3{
+			ignore_bins val_neg = binsof (cov_3.val_op_a_neg);
+		}
+
+		cov_5: cross cov_0,cov_3{
+			ignore_bins val_poz = binsof (cov_3.val_op_a_poz);
+		}
+
+		// cov_6: cross cov_0,cov_3{
+			// ignore_bins val_poz = binsof (cov_3.val_op_a_poz);
+		// }		
+	
+	endgroup
 		
 	function new(virtual tb_ifc vifc);
 		this.vifc = vifc;
 		tr = new();
 		tr_ext = new();
+		inputs_measure = new;
 	endfunction
 		
 	task generate_transaction;
@@ -105,9 +146,11 @@ module instr_register_test (tb_ifc io);  // interface port
 		$display("\nWriting values to register stack...");
 		@(vifc.cb) vifc.cb.load_en <= 1'b1;  // enable writing to register
 		
-		repeat (3) begin
+		repeat (100) begin
 		@(vifc.cb) tr.randomize();
+		
 		assign_signals();
+		inputs_measure.sample();
 		// vifc.cb.operand_a <= tr.operand_a;
 		// vifc.cb.operand_b <= tr.operand_b;
 		// vifc.cb.opcode	  <= tr.opcode;
@@ -117,9 +160,10 @@ module instr_register_test (tb_ifc io);  // interface port
 		
 		tr = tr_ext;
 		
-		repeat (3) begin
+		repeat (100) begin
 		@(vifc.cb) tr.randomize();
 		assign_signals();
+		inputs_measure.sample();
 		// vifc.cb.operand_a <= tr.operand_a;
 		// vifc.cb.operand_b <= tr.operand_b;
 		// vifc.cb.opcode	  <= tr.opcode;
